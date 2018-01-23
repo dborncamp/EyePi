@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package protobuf;
+
+import "google/api/annotations.proto";
+
+// Defines the interface implemented and methods exposed by the exemplar service.
+service EyePi {
+
+    // HelloProxy says 'hello' in a form that is handled by the gateway proxy.
+    rpc HelloProxy(HelloRequest) returns (HelloResponse) {
+
+        // Defines the optional REST method and route to be exposed cooresponding to the `HelloProxy` method.
+        option (google.api.http) = {
+            get: "/EyePi/services/hello"
+        };
+    }
+}
+
+// Defines the request type for the `HelloProxy` method.
+message HelloRequest {
+    string hello_text = 1;
+}
+
+// Defines the response type for the `HelloProxy` method.
+message HelloResponse {
+    string text = 1;
+}
