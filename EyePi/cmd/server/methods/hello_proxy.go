@@ -11,7 +11,7 @@ import (
 // HelloProxy says "hello" in a form that is handled by the gateway proxy
 func (s *serverData) HelloProxy(_ context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error) {
 	if req.HelloText == "ping" {
-		return &pb.HelloResponse{Text: "pong"}, nil
+		return &pb.HelloResponse{Text: "pong Here!"}, nil
 	}
 	return nil, errors.New("invalid request")
 }

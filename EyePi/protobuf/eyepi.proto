@@ -15,6 +15,13 @@ service EyePi {
             get: "/EyePi/services/hello"
         };
     }
+
+    rpc AcceptImage(ImageRequest) returns (ImageResponse){
+        option (google.api.http) = {
+            post: "/image"
+            body: "*"
+        };
+    }
 }
 
 // Defines the request type for the `HelloProxy` method.
@@ -24,5 +31,14 @@ message HelloRequest {
 
 // Defines the response type for the `HelloProxy` method.
 message HelloResponse {
+    string text = 1;
+}
+
+message ImageRequest {
+    string ImageName = 1;
+    bytes image = 2;
+}
+
+message ImageResponse {
     string text = 1;
 }

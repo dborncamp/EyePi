@@ -45,6 +45,19 @@ func request_EyePi_HelloProxy_0(ctx context.Context, marshaler runtime.Marshaler
 
 }
 
+func request_EyePi_AcceptImage_0(ctx context.Context, marshaler runtime.Marshaler, client EyePiClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ImageRequest
+	var metadata runtime.ServerMetadata
+
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.AcceptImage(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
 // RegisterEyePiHandlerFromEndpoint is same as RegisterEyePiHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterEyePiHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
@@ -112,13 +125,46 @@ func RegisterEyePiHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 
 	})
 
+	mux.Handle("POST", pattern_EyePi_AcceptImage_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		if cn, ok := w.(http.CloseNotifier); ok {
+			go func(done <-chan struct{}, closed <-chan bool) {
+				select {
+				case <-done:
+				case <-closed:
+					cancel()
+				}
+			}(ctx.Done(), cn.CloseNotify())
+		}
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_EyePi_AcceptImage_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_EyePi_AcceptImage_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
 var (
 	pattern_EyePi_HelloProxy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"EyePi", "services", "hello"}, ""))
+
+	pattern_EyePi_AcceptImage_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"image"}, ""))
 )
 
 var (
 	forward_EyePi_HelloProxy_0 = runtime.ForwardResponseMessage
+
+	forward_EyePi_AcceptImage_0 = runtime.ForwardResponseMessage
 )
